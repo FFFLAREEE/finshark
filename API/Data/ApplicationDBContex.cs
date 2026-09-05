@@ -24,8 +24,46 @@ namespace API.Data
         }
         public DbSet<Stock>Stocks{get;set;}
         public DbSet<Comment> Comments{get;set;}
-       
-        
+
+        // seed股票数据
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Stock>().HasData(
+                new Stock
+                {
+                    Id = 1,
+                    Symbol = "AAPL",
+                    CompanyName = "Apple Inc.",
+                    Purchase = 150.00m,
+                    LastDiv = 0.24m,
+                    Industry = "Technology",
+                    MarketCap = 3000000000000
+                },
+                new Stock
+                {
+                    Id = 2,
+                    Symbol = "MSFT",
+                    CompanyName = "Microsoft Corporation",
+                    Purchase = 320.00m,
+                    LastDiv = 0.75m,
+                    Industry = "Technology",
+                    MarketCap = 2800000000000
+                },
+                new Stock
+                {
+                    Id = 3,
+                    Symbol = "TSLA",
+                    CompanyName = "Tesla Inc.",
+                    Purchase = 220.00m,
+                    LastDiv = 0.00m,
+                    Industry = "Automotive",
+                    MarketCap = 700000000000
+                }
+            );
+        }
+
     }
     
 }
