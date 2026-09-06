@@ -1,4 +1,5 @@
 using API.Data;
+using API.Mappers;
 using API.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,13 +27,17 @@ namespace API.Controllers
         [HttpGet]//表示下面的方法负责处理 HTTP GET 请求
         public IActionResult GetAll()
         {
-            var stocks=_context.Stocks.ToList();//从数据库的 Stocks 表中取出所有记录，并转换成一个 List。
+            var stocks = _context.Stocks.ToList()
+                .Select(s => s.ToStockDto());//从数据库的 Stocks 表中取出所有记录，并转换成一个 List。
             //_context.Stocks
             // 访问 ApplicationDBContext 中定义的 Stocks
             
             //.ToList()
             // 执行数据库查询，把查到的所有股票转成：
             // List<Stock>
+            
+            //可以把 C# LINQ 的 Select() 理解成 JavaScript 的 map()。
+            // 它们的作用都是： 对集合里的每个元素进行一次转换，最后得到一个新集合。
             return Ok(stocks);
         }
 
@@ -44,7 +49,7 @@ namespace API.Controllers
             {
                 return NotFound();
             }
-            return Ok(stock);
+            return Ok(stock.ToStockDto());
         }
     }
     
