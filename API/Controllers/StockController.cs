@@ -93,6 +93,20 @@ namespace API.Controllers
             return Ok(stockModel.ToStockDto());
             //stockModel.ToStockDto() 把数据库实体 Stock 转换成用于返回给前端的 StockDto，可以避免把数据库实体中的所有内容直接暴露给前端，只返回 API 希望提供的数据
         }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public IActionResult Delete([FromRoute] int id)
+        {
+            var stockModel=_context.Stocks.FirstOrDefault(x=>x.Id == id);
+            if (stockModel == null)
+            {
+                return NotFound();
+            }
+            _context.Stocks.Remove(stockModel);
+            _context.SaveChanges();
+            return NoContent();
+        }
     }
     
 }
