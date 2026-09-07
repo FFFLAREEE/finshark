@@ -3,6 +3,7 @@ using API.Dtos.Stock;
 using API.Mappers;
 using API.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -26,10 +27,11 @@ namespace API.Controllers
         }
 
         [HttpGet]//表示下面的方法负责处理 HTTP GET 请求
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll() //Task里面是被期待return的数据类型
         {
-            var stocks = _context.Stocks.ToList()
-                .Select(s => s.ToStockDto());//从数据库的 Stocks 表中取出所有记录，并转换成一个 List。
+            var stocks = await _context.Stocks.ToListAsync();
+                var stockDto =stocks.Select(s=>s.ToStockDto());
+               //从数据库的 Stocks 表中取出所有记录，并转换成一个 List。
             //_context.Stocks
             // 访问 ApplicationDBContext 中定义的 Stocks
             
@@ -43,9 +45,9 @@ namespace API.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById([FromRoute] int id)
+        public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var stock= _context.Stocks.Find(id);
+            var stock= await _context.Stocks.FindAsync(id);
             if (stock == null)
             {
                 return NotFound();
@@ -54,19 +56,19 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] CreateStockRequestDto stockDto)
+        public async Task<IActionResult> Create([FromBody] CreateStockRequestDto stockDto)
         {
             var stockModel = stockDto.ToStockFromCreateDto();
 
-            _context.Stocks.Add(stockModel);
-            _context.SaveChanges();
+           await _context.Stocks.AddAsync(stockModel);
+           await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetById), new { id = stockModel.Id }, stockModel);
         }
 
         [HttpPut]
         [Route("{id}")]//表示这个 API 的 URL 中必须包含一个 id
-        public IActionResult Update([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto)
         //IActionResult
         // 表示该方法会返回一个 HTTP 响应
         //Update
@@ -76,7 +78,7 @@ namespace API.Controllers
         //[FromBody] UpdateStockRequestDto updateDto
         // 表示从 HTTP 请求 body 中读取 JSON，并转换成 UpdateStockRequestDto 对象
         {
-            var stockModel =_context.Stocks.FirstOrDefault(x=>x.Id == id);//对每一条股票记录 x，检查它的 Id 是否等于传进来的 id
+            var stockModel = await _context.Stocks.FirstOrDefaultAsync(x=>x.Id == id);//对每一条股票记录 x，检查它的 Id 是否等于传进来的 id
             //FirstOrDefault(...) 如果找到了，返回第一条符合条件的数据； 如果没有找到，返回默认值 null；
             
             if (stockModel == null)
@@ -89,25 +91,26 @@ namespace API.Controllers
             stockModel.LastDiv= updateDto.LastDiv;
             stockModel.MarketCap= updateDto.MarketCap;
             stockModel.Industry= updateDto.Industry;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return Ok(stockModel.ToStockDto());
             //stockModel.ToStockDto() 把数据库实体 Stock 转换成用于返回给前端的 StockDto，可以避免把数据库实体中的所有内容直接暴露给前端，只返回 API 希望提供的数据
         }
 
         [HttpDelete]
         [Route("{id}")]
-        public IActionResult Delete([FromRoute] int id)
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var stockModel=_context.Stocks.FirstOrDefault(x=>x.Id == id);
+            var stockModel= await _context.Stocks.FirstOrDefaultAsync(x=>x.Id == id);
             if (stockModel == null)
             {
                 return NotFound();
             }
             _context.Stocks.Remove(stockModel);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return NoContent();
         }
     }
     
 }
 
+//需要用到database的操作 用await 
