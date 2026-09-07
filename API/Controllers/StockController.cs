@@ -63,6 +63,36 @@ namespace API.Controllers
 
             return CreatedAtAction(nameof(GetById), new { id = stockModel.Id }, stockModel);
         }
+
+        [HttpPut]
+        [Route("{id}")]//表示这个 API 的 URL 中必须包含一个 id
+        public IActionResult Update([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto)
+        //IActionResult
+        // 表示该方法会返回一个 HTTP 响应
+        //Update
+        // 这是方法名，表示它负责更新股票。
+        // [FromRoute] int id
+        // 表示从 URL 路由中取得 id。
+        //[FromBody] UpdateStockRequestDto updateDto
+        // 表示从 HTTP 请求 body 中读取 JSON，并转换成 UpdateStockRequestDto 对象
+        {
+            var stockModel =_context.Stocks.FirstOrDefault(x=>x.Id == id);//对每一条股票记录 x，检查它的 Id 是否等于传进来的 id
+            //FirstOrDefault(...) 如果找到了，返回第一条符合条件的数据； 如果没有找到，返回默认值 null；
+            
+            if (stockModel == null)
+            {
+                return NotFound();
+            }
+            stockModel.Symbol = updateDto.Symbol;
+            stockModel.CompanyName= updateDto.CompanyName;
+            stockModel.Purchase= updateDto.Purchase;
+            stockModel.LastDiv= updateDto.LastDiv;
+            stockModel.MarketCap= updateDto.MarketCap;
+            stockModel.Industry= updateDto.Industry;
+            _context.SaveChanges();
+            return Ok(stockModel.ToStockDto());
+            //stockModel.ToStockDto() 把数据库实体 Stock 转换成用于返回给前端的 StockDto，可以避免把数据库实体中的所有内容直接暴露给前端，只返回 API 希望提供的数据
+        }
     }
     
 }
